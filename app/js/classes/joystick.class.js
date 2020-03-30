@@ -98,6 +98,14 @@ class Joystick {
 		this.checkRaw();
 	}
 
+    diff(num1, num2) {
+        if (num1 > num2) {
+            return num1 - num2
+        } else {
+            return num2 - num1
+    }
+    }
+
 	checkRaw() {
 
 		if (!this.getCurrentDriver().isConnected()) {
@@ -106,44 +114,65 @@ class Joystick {
 
 		// Buttons
 		const joystick = this.getCurrentDriver().getJoystick();
-		for (const i in joystick.buttons) {
-			if (joystick.buttons[i].pressed) {
-				this.lastButton = i;
-				$(`*[ojd-raw-button='${i}']`).addClass('ojd-tester-active');
-			} else {
-				$(`*[ojd-raw-button='${i}']`).removeClass('ojd-tester-active');
-			}
-		}
+        let previousButtons = []
+        let pressedButtons = []
+        previousButtons = this.getCurrentDriver().getPressedButtons()
 
-		// 2D Directional View
-		const directionalCount = joystick.axes.length/2;
-		let axisIndex = 0;
-		for (let i=0;i<directionalCount;i++) {
+        for (const i in joystick.buttons) {
+            if (joystick.buttons[i].pressed) {
+                pressedButtons.push(i)
+                this.lastButton = i
+                if (previousButtons.indexOf(i) == -1) {
+                    $(`*[ojd-raw-button='${i}']`).addClass('ojd-tester-active')
+                }
+            } else {
+                if (previousButtons.indexOf(i) != -1) {
+                    $(`*[ojd-raw-button='${i}']`).removeClass('ojd-tester-active')
+                }
+            }
+        }
 
-			let offset ={};
-			let axis1 = axisIndex;
-			let axis2 = axisIndex+1;
+        this.getCurrentDriver().setPressedButtons(pressedButtons)
 
-			axisIndex+=2;
+        // 2D Directional View
+        const directionalCount = joystick.axes.length / 2
+        let axisIndex = 0
+        for (let i = 0; i < directionalCount; i++) {
 
-			offset = this.checkAnalog(axis1, axis2, 0);
-			$(`span[ojd-raw-analog-axes-x='${i}']`).html(axis1);
-			$(`span[ojd-raw-analog-axes-y='${i}']`).html(axis2);
-			$(`*[ojd-raw-analog='${i}']`).css('top',`${offset.y}%`);
-			$(`*[ojd-raw-analog='${i}']`).css('left',`${offset.x}%`);
-			$(`*[ojd-raw-analog-x='${i}']`).val(offset.xRaw.toFixed(4));
-			$(`*[ojd-raw-analog-y='${i}']`).val(offset.yRaw.toFixed(4));
-		}
+            let offset = {}
+            let localoffset = { x: 0, y: 0 }
+            let axis1 = axisIndex
+            let axis2 = axisIndex + 1
 
-		// 1D Thottle/Linear Axes View
-		for(const i in joystick.axes) {
-			const value = joystick.axes[i];
-			const valueOffset = value+1; // Allows for easy percentage calculation
-			$(`*[ojd-raw-axes-value='${i}']`).val(value.toFixed(4));
-			$(`*[ojd-raw-axes='${i}']`).css('width',`${100*(valueOffset/2)}%`);
-		}
+            axisIndex += 2
 
-	}
+            offset = this.checkAnalog(axis1, axis2, 0)
+            localoffset.x = this.drivers[this.driver].getXOffset(i)
+            localoffset.y = this.drivers[this.driver].getYOffset(i)
+            if (this.diff(offset.x, localoffset.x) > 0.05 ||
+                this.diff(offset.y, localoffset.y) > 0.05) {
+                console.debug("Analog value is different")
+                console.debug("Setting x: " + offset.x + ", y: " + offset.y)
+                this.getCurrentDriver().setOffset(i, offset)
+                $(`span[ojd-raw-analog-axes-x='${i}']`).html(axis1)
+                $(`span[ojd-raw-analog-axes-y='${i}']`).html(axis2)
+                $(`*[ojd-raw-analog='${i}']`, `#ojd-tester-dimensional-axes`).css('top', `${offset.y}%`)
+                $(`*[ojd-raw-analog='${i}']`, `#ojd-tester-dimensional-axes`).css('left', `${offset.x}%`)
+                $(`*[ojd-raw-analog-x='${i}']`).val(offset.xRaw.toFixed(4))
+                $(`*[ojd-raw-analog-y='${i}']`).val(offset.yRaw.toFixed(4))
+
+                // 1D Thottle/Linear Axes View
+                $(`*[ojd-raw-axes-value='${axis1}']`).val(offset.xRaw.toFixed(4))
+                $(`*[ojd-raw-axes='${axis1}']`).css('width', `${100 * ((1 + offset.xRaw) / 2)}%`)
+                $(`*[ojd-raw-axes-value='${axis2}']`).val(offset.yRaw.toFixed(4))
+                $(`*[ojd-raw-axes='${axis2}']`).css('width', `${100 * ((1 + offset.yRaw) / 2)}%`)
+            } else {
+                //console.debug("Analog value is the same")
+            }
+        }
+
+
+    }
 
 	checkMapping() {
 
