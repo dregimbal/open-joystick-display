@@ -12,7 +12,6 @@ class Joystick {
         this.config = config
         this.profiles = profiles
         this.driver = this.profiles.getCurrentProfileDriver()
-        this.lastButton = 0
 
         // Keywords for Interface
         this.dpadKeywords = ['LEFT', 'RIGHT', 'UP', 'DOWN']
@@ -25,6 +24,17 @@ class Joystick {
             'network': new NetworkDriver(this)
             //'hid':new HIDDriver(this)
         }
+
+        this.prevButtons = []
+        this.newButtons = []
+        this.prevMapping = []
+        this.newMapping = []
+        this.arcadeOffset = {}
+        this.directionals = [{}]
+        this.activeTriggers = []
+        this.activeFixedTriggers = [{}]
+        this.fixedTriggerOffset = {}
+        this.triggers = {}
 
         // Setup Checking
         const poll = this.profiles.getCurrentProfilePoll()
@@ -94,8 +104,97 @@ class Joystick {
     }
 
     intervalCheckJoystick() {
-        this.checkMapping()
+        this.checkArcadeMapping()
+        this.checkDirectionalMapping()
+        this.checkTriggerMapping()
+        this.checkFixedTriggerMapping()
         this.checkRaw()
+
+        // Get currently pressed buttons
+        this.newButtons = this.getPressedButtons()
+        this.newMapping = this.getPressedButtonMapping()
+
+        // Change the styles of buttons that have changed
+        this.updateButtonStyles()
+        this.updateMappedButtonStyles()
+
+        // Set the variables for the next loop
+        this.prevButtons = this.newButtons
+        this.prevMapping = this.newMapping
+    }
+
+    getPressedButtons() {
+        const joystick = this.getCurrentDriver().getJoystick()
+        let pressed = []
+        for (const i in joystick.buttons) {
+            if (joystick.buttons[i].pressed) {
+                pressed.push(i)
+            }
+        }
+        return pressed
+    }
+
+    getPressedButtonMapping() {
+
+        let buttonMapping = this.profiles.getCurrentProfileMapping().button
+        let pressed = []
+        this.newButtons.forEach((i) => {
+            buttonMapping.filter((button) => {
+                return button.index == i
+            })
+                .map((mapped) => {
+                    return mapped.button
+                })
+                .forEach((mapping) => {
+                    pressed.push(mapping)
+                })
+        })
+        return pressed
+    }
+
+    updateButtonStyles() {
+        // Check if buttons were released
+        this.prevButtons.forEach((button) => {
+            if (!this.newButtons.includes(button)) {
+                $(`*[ojd-raw-button='${button}']`).removeClass('ojd-tester-active')
+            }
+        })
+
+        // Check if buttons were pressed
+        this.newButtons.forEach((button) => {
+            if (!this.prevButtons.includes(button)) {
+                $(`*[ojd-raw-button='${button}']`).addClass('ojd-tester-active')
+            }
+        })
+
+    }
+    updateMappedButtonStyles() {
+        // Check if buttons were released
+        this.prevMapping.forEach((mapping) => {
+            if (!this.newMapping.includes(mapping)) {
+                $(`*[ojd-button='${mapping}']`).removeClass('active')
+                $(`*[ojd\\:button='${mapping}']`).removeClass('active')
+            }
+        })
+
+        // Check if buttons were pressed
+        this.newMapping.forEach((mapping) => {
+            if (!this.prevMapping.includes(mapping)) {
+                $(`*[ojd-button='${mapping}']`).addClass('active')
+                $(`*[ojd\\:button='${mapping}']`).addClass('active')
+            }
+        })
+
+    }
+
+    updateArcadeStickStyles() {
+        $(`*[ojd-arcade-directional]`).css('top', `${this.arcadeOffset.y}%`)
+        $(`*[ojd-arcade-directional]`).css('left', `${this.arcadeOffset.x}%`)
+        if (this.arcadeOffset.x !== 50 || this.arcadeOffset.y !== 50) {
+            $(`*[ojd-arcade-directional]`).addClass('active')
+        } else {
+            $(`*[ojd-arcade-directional]`).removeClass('active')
+        }
     }
 
     diff(num1, num2) {
@@ -106,33 +205,14 @@ class Joystick {
         }
     }
 
+
     checkRaw() {
 
         if (!this.getCurrentDriver().isConnected()) {
             return false
         }
 
-        // Buttons
         const joystick = this.getCurrentDriver().getJoystick()
-        let previousButtons = []
-        let pressedButtons = []
-        previousButtons = this.getCurrentDriver().getPressedButtons()
-
-        for (const i in joystick.buttons) {
-            if (joystick.buttons[i].pressed) {
-                pressedButtons.push(i)
-                this.lastButton = i
-                if (previousButtons.indexOf(i) == -1) {
-                    $(`*[ojd-raw-button='${i}']`).addClass('ojd-tester-active')
-                }
-            } else {
-                if (previousButtons.indexOf(i) != -1) {
-                    $(`*[ojd-raw-button='${i}']`).removeClass('ojd-tester-active')
-                }
-            }
-        }
-
-        this.getCurrentDriver().setPressedButtons(pressedButtons)
 
         // 2D Directional View
         const directionalCount = joystick.axes.length / 2
@@ -151,8 +231,8 @@ class Joystick {
             localoffset.y = this.drivers[this.driver].getYOffset(i)
             if (this.diff(offset.x, localoffset.x) > 0.05 ||
                 this.diff(offset.y, localoffset.y) > 0.05) {
-                console.debug("Analog value is different")
-                console.debug("Setting x: " + offset.x + ", y: " + offset.y)
+                // console.debug("Analog value is different")
+                // console.debug("Setting x: " + offset.x + ", y: " + offset.y)
                 this.getCurrentDriver().setOffset(i, offset)
                 $(`span[ojd-raw-analog-axes-x='${i}']`).html(axis1)
                 $(`span[ojd-raw-analog-axes-y='${i}']`).html(axis2)
@@ -174,8 +254,7 @@ class Joystick {
 
     }
 
-    checkMapping() {
-
+    checkDirectionalMapping() {
         if (!this.getCurrentDriver().isConnected()) {
             return false
         }
@@ -189,26 +268,12 @@ class Joystick {
             const pressed = this.checkButtonPressed(k.index)
             if (pressed) {
                 multimapCheck.push(k.button)
-                $(`*[ojd-button='${k.button}']`).addClass('active')
-                $(`*[ojd\\:button='${k.button}']`).addClass('active')
-            } else {
-                if (!multimapCheck.includes(k.button)) {
-                    $(`*[ojd-button='${k.button}']`).removeClass('active')
-                    $(`*[ojd\\:button='${k.button}']`).removeClass('active')
-                }
             }
         }
 
-        // Check for Arcade Stick
-        const arcadeOffset = this.checkArcadeStick(currentButtonMapping)
-        $(`*[ojd-arcade-directional]`).css('top', `${arcadeOffset.y}%`)
-        $(`*[ojd-arcade-directional]`).css('left', `${arcadeOffset.x}%`)
-        if (arcadeOffset.x !== 50 || arcadeOffset.y !== 50) {
-            $(`*[ojd-arcade-directional]`).addClass('active')
-        } else {
-            $(`*[ojd-arcade-directional]`).removeClass('active')
+        while (this.directionals.length < currentMapping.directional.length) {
+            this.directionals.push({})
         }
-
         // Check Directional Pad
         for (const i in currentMapping.directional) {
 
@@ -222,15 +287,22 @@ class Joystick {
             const offset = this.checkAnalog(axisIndex1, axisIndex2, deadzone, hasInfinity, invertX, invertY)
 
             // All directionals are treated like analogs regardless
-            $(`*[ojd-directional='${i}']`).css('top', `${offset.y}%`)
-            $(`*[ojd-directional='${i}']`).css('left', `${offset.x}%`)
+            if (this.directionals[i].offsetY != offset.y ||
+                this.directionals[i].offsetX != offset.x) {
+                $(`*[ojd-directional='${i}']`).css('top', `${offset.y}%`)
+                $(`*[ojd-directional='${i}']`).css('left', `${offset.x}%`)
 
-            // Allow for highlighting.
-            if (offset.x !== 50 || offset.y !== 50) {
-                $(`*[ojd-directional='${i}']`).addClass('active')
-            } else {
-                $(`*[ojd-directional='${i}']`).removeClass('active')
+                // Allow for highlighting.
+                if (offset.x !== 50 || offset.y !== 50) {
+                    $(`*[ojd-directional='${i}']`).addClass('active')
+                } else {
+                    $(`*[ojd-directional='${i}']`).removeClass('active')
+                }
+
+                this.directionals[i].offsetY = offset.y
+                this.directionals[i].offsetX = offset.x
             }
+
 
             // Is axes support to function like a dpad?
             if (directional.dpad) {
@@ -264,13 +336,34 @@ class Joystick {
 
         }
 
+    }
+
+    checkTriggerMapping() {
+
+        if (!this.getCurrentDriver().isConnected()) {
+            return false
+        }
+
+        const currentMapping = this.profiles.getCurrentProfileMapping()
+        const currentButtonMapping = currentMapping.button
+
+        // Check Buttons
+        const multimapCheck = [] // In case a single button is mapped to multiple physical buttons.
+        for (const k of currentButtonMapping) {
+            const pressed = this.checkButtonPressed(k.index)
+            if (pressed) {
+                multimapCheck.push(k.button)
+            }
+        }
         for (const i in currentMapping.trigger) {
 
             const trigger = currentMapping.trigger[i]
             const active = this.checkTrigger(trigger.axis, trigger.range[0], trigger.range[1])
 
             if (active !== false) {
-
+                if (!this.activeTriggers.includes(i)) {
+                    this.activeTriggers.push(i)
+                }
                 let scale = ((active + 1) / (trigger.range[1] + 1)) * 100
 
                 if (trigger.invert) {
@@ -303,31 +396,52 @@ class Joystick {
                 }
 
             } else {
+                if (this.activeTriggers.includes(i)) {
+                    this.activeTriggers = this.activeTriggers.filter((trigger) => trigger != i)
+                    $(`*[ojd-trigger-scale='${i}']`).css('height', '')
+                    $(`*[ojd-trigger-scale-inverted='${i}']`).css('height', '')
+                    $(`*[ojd-trigger-move='${i}']`).css('top', ``)
+                    $(`*[ojd-trigger-move-inverted='${i}']`).css('top', ``)
+                    $(`*[ojd-trigger-wheel='${i}']`).css('transform', ``)
+                    $(`*[ojd-trigger='${i}']`).removeClass('trigger-active')
 
-                $(`*[ojd-trigger-scale='${i}']`).css('height', '')
-                $(`*[ojd-trigger-scale-inverted='${i}']`).css('height', '')
-                $(`*[ojd-trigger-move='${i}']`).css('top', ``)
-                $(`*[ojd-trigger-move-inverted='${i}']`).css('top', ``)
-                $(`*[ojd-trigger-wheel='${i}']`).css('transform', ``)
-                $(`*[ojd-trigger='${i}']`).removeClass('trigger-active')
-
-                if (trigger.button) {
-                    if (!multimapCheck.includes(trigger.button)) {
-                        $(`*[ojd-button='${trigger.button}']`).removeClass('active')
+                    if (trigger.button) {
+                        if (!multimapCheck.includes(trigger.button)) {
+                            $(`*[ojd-button='${trigger.button}']`).removeClass('active')
+                        }
                     }
                 }
             }
 
         }
 
+    }
+    checkFixedTriggerMapping() {
+
+        if (!this.getCurrentDriver().isConnected()) {
+            return false
+        }
+
+        const currentMapping = this.profiles.getCurrentProfileMapping()
+        const currentButtonMapping = currentMapping.button
+
+        // Check Buttons
+        const multimapCheck = [] // In case a single button is mapped to multiple physical buttons.
+        for (const k of currentButtonMapping) {
+            const pressed = this.checkButtonPressed(k.index)
+            if (pressed) {
+                multimapCheck.push(k.button)
+            }
+        }
         const fixedTriggerDir = []
+        while (this.activeFixedTriggers.length < currentMapping.triggerFixed.length) {
+            this.activeFixedTriggers.push({})
+        }
         for (const i in currentMapping.triggerFixed) {
             const trigger = currentMapping.triggerFixed[i]
             const active = this.checkFixedTrigger(trigger.axis, trigger.val)
 
-
-
-            if (active) {
+            if (active && !this.activeFixedTriggers[i].active) {
 
                 if (trigger.button1) {
                     multimapCheck.push(trigger.button1)
@@ -341,7 +455,7 @@ class Joystick {
                     fixedTriggerDir.push(trigger.button2)
                 }
 
-            } else {
+            } else if (!active && this.activeFixedTriggers[i].active) {
                 if (trigger.button1) {
                     if (!multimapCheck.includes(trigger.button1)) {
                         $(`*[ojd-button='${trigger.button1}']`).removeClass('active')
@@ -355,20 +469,44 @@ class Joystick {
                 }
 
             }
+
+            this.activeFixedTriggers[i].active = !!active
         }
 
 
         const fixedTriggerOffset = this.checkTriggerArcadeStick(fixedTriggerDir)
-        if (fixedTriggerOffset.x !== 50 || fixedTriggerOffset.y !== 50) {
-            $(`*[ojd-arcade-directional]`).addClass('active')
-        } else {
-            $(`*[ojd-arcade-directional]`).removeClass('active')
+        if (this.fixedTriggerOffset.xRaw != fixedTriggerOffset.xRaw ||
+            this.fixedTriggerOffset.yRaw != fixedTriggerOffset.yRaw ||
+            this.fixedTriggerOffset.x != fixedTriggerOffset.x ||
+            this.fixedTriggerOffset.y != fixedTriggerOffset.y) {
+            this.fixedTriggerOffset = fixedTriggerOffset
+            if (fixedTriggerOffset.x !== 50 || fixedTriggerOffset.y !== 50) {
+                $(`*[ojd-arcade-directional]`).addClass('active')
+            } else {
+                $(`*[ojd-arcade-directional]`).removeClass('active')
+            }
+
+            // All directionals are treated like analogs regardless
+            $(`*[ojd-arcade-directional]`).css('top', `${fixedTriggerOffset.y}%`)
+            $(`*[ojd-arcade-directional]`).css('left', `${fixedTriggerOffset.x}%`)
+        }
+    }
+
+    checkArcadeMapping() {
+        if (!this.getCurrentDriver().isConnected()) {
+            return false
         }
 
-        // All directionals are treated like analogs regardless
-        $(`*[ojd-arcade-directional]`).css('top', `${fixedTriggerOffset.y}%`)
-        $(`*[ojd-arcade-directional]`).css('left', `${fixedTriggerOffset.x}%`)
+        const currentMapping = this.profiles.getCurrentProfileMapping()
+        const currentButtonMapping = currentMapping.button
 
+        // Check for Arcade Stick
+        const arcadeOffset = this.checkArcadeStick(currentButtonMapping)
+        if (arcadeOffset.x != this.arcadeOffset.x ||
+            arcadeOffset.y != this.arcadeOffset.y) {
+            this.arcadeOffset = arcadeOffset
+            this.updateArcadeStickStyles()
+        }
     }
 
 
