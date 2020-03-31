@@ -10,7 +10,6 @@ class Joystick {
         this.config = config
         this.profiles = profiles
         this.driver = this.profiles.getCurrentProfileDriver()
-        this.lastButton = 0
 
         // Keywords for Interface
         this.dpadKeywords = ['LEFT', 'RIGHT', 'UP', 'DOWN']
@@ -34,7 +33,6 @@ class Joystick {
         this.activeTriggers = []
         this.activeFixedTriggers = [{}]
         this.fixedTriggerOffset = {}
-        this.triggers = {}
 
         // Setup Checking
         const poll = this.profiles.getCurrentProfilePoll()
