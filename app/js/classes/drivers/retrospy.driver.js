@@ -116,17 +116,15 @@ class RetroSpyDriver {
     getInformation() {
         if (this.device && this.port) {
             return `Connected on ${this.port}: ${this.device.getInformation()}.`
-        } 
-            return 'RetroSpy is not connected. Check your arduino installation, your firmware, your serial port, your cable, and if your console is currently on.'
-        
+        }
+        return 'RetroSpy is not connected. Check your arduino installation, your firmware, your serial port, your cable, and if your console is currently on.'
     }
 
     getJoystick() {
         if (this.device && this.port) {
             return this.device.getJoystick()
-        } 
-            return { buttons: [], axes: [] }
-        
+        }
+        return { buttons: [], axes: [] }
     }
 
     getPorts() {

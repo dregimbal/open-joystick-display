@@ -111,7 +111,7 @@
         "consistent-return": 1, // require return statements to either always or never specify values
         "default-case": 1, // require default case in switch statements (off by default)
         "dot-notation": 2, // encourages use of dot notation whenever possible
-        "guard-for-in": 1, // make sure for-in loops have an if statement (off by default)
+        "guard-for-in": 0, // make sure for-in loops have an if statement (off by default)
         "no-alert": 1, // warn about the use of alert, confirm, and prompt
         "no-caller": 2, // disallow use of arguments.caller or arguments.callee
         "no-div-regex": 2, // disallow division operators explicitly at beginning of regular expression (off by default)
@@ -161,7 +161,10 @@
         "wrap-iife": 2, // require immediate function invocation to be wrapped in parentheses (off by default)
         "complexity": 0, // specify the maximum cyclomatic complexity allowed in a program (off by default)
         "curly": 2, // specify curly brace conventions for all control statements
-        "eqeqeq": 1, // require the use of === and !==
+        "eqeqeq": [
+            "warn",
+            "smart"
+        ], // require the use of === and !==
         "radix": 1, // require use of the second argument for parseInt() (off by default)
         "yoda": 2, // require or disallow Yoda conditions
         //

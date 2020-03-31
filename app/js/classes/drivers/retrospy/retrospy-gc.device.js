@@ -72,9 +72,8 @@ class RetroSpyDevice_GC {
                 axisValue *= -1
             }
             return axisValue
-        } 
-            return 0.0
-        
+        }
+        return 0.0
     }
 
     read(line) {

@@ -56,9 +56,8 @@ class HIDDriver {
     getInformation() {
         if (this.joystickConnected) {
             return this.joystickInfo
-        } 
-            return 'No joystick connected. Please connect a joystick and press a button to activate.'
-        
+        }
+        return 'No joystick connected. Please connect a joystick and press a button to activate.'
     }
 
     getPorts() {
