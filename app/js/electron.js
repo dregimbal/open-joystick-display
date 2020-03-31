@@ -4,21 +4,20 @@ const { app, BrowserWindow } = require('electron')
 let mainWindow
 
 // Fixes it for Windows 10, noticed much more stable performance in OBS Linux as well.
-// app.disableHardwareAcceleration();
+app.disableHardwareAcceleration()
 
 function createWindow() {
-
     global.sharedObject = { argv: process.argv }
 
-    if (process.platform === "win32") {
+    if (process.platform === 'win32') {
         cwd = __dirname.replace('app\\js', '')
-        ico = cwd + "app/icons/icon.png"
-    } else if (process.platform === "darwin") {
+        ico = cwd + 'app/icons/icon.png'
+    } else if (process.platform === 'darwin') {
         cwd = __dirname.replace('app/js', '')
-        ico = cwd + "app/icons/icon.icns"
+        ico = cwd + 'app/icons/icon.icns'
     } else {
         cwd = __dirname.replace('app/js', '')
-        ico = cwd + "app/icons/icon.png"
+        ico = cwd + 'app/icons/icon.png'
     }
 
     const windowConfig = {
@@ -40,7 +39,6 @@ function createWindow() {
     mainWindow.setMenu(null)
 
     mainWindow.loadFile('app/views/index.view.html')
-
 }
 
 app.on('ready', createWindow)
@@ -56,3 +54,5 @@ app.on('activate', function () {
         createWindow()
     }
 })
+
+
