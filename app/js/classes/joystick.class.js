@@ -312,6 +312,7 @@ class Joystick {
                 }
             }
         }
+        return false
     }
 
     checkTriggerMapping() {
@@ -356,7 +357,7 @@ class Joystick {
                 } else {
                     degrees = 0
                 }
-                degrees = parseInt(degrees / 2)
+                degrees = parseInt(degrees / 2, 10)
 
                 $(`*[ojd-trigger-scale='${i}']`).css('height', `${scale}%`)
                 $(`*[ojd-trigger-move='${i}']`).css('top', `${scale}%`)
@@ -542,6 +543,8 @@ class Joystick {
                 case 'RIGHT':
                     buttons.RIGHT = k.index
                     break
+                default:
+                    break
             }
         }
 
@@ -589,7 +592,7 @@ class Joystick {
         const joystick = this.getCurrentDriver().getJoystick()
         const axis = joystick.axes[axisIndex]
 
-        if (axis.toFixed(4) == val) {
+        if (parseFloat(axis.toFixed(4)) === parseFloat(val.toFixed(4))) {
             return true
         }
 
@@ -625,6 +628,7 @@ class Joystick {
                 axis2 = 0
             }
         }
+
         let x = 0
         let y = 0
 
@@ -664,6 +668,7 @@ class Joystick {
         } else {
             offset.y = 50 + (y * 50)
         }
+
 
         return offset
     }
