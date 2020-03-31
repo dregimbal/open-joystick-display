@@ -2,12 +2,18 @@
 
 Visual Studio with the "Desktop development with C++" workload
 
-npm, gulp-cli, yarn
+npm, gulp-cli, yarn, eslint
 
 # Installation
 
 ```yarn```
 
+```eslint --fix .```
+
+```gulp build```
+
 ```gulp rebuild-electron```
 
-```npm start```
+```yarn start```
+
+```yarn build```
