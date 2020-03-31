@@ -24,6 +24,7 @@ class Joystick {
             // 'hid':new HIDDriver(this)
         }
 
+        this.activeTriggers = []
         // Setup Checking
         const poll = this.profiles.getCurrentProfilePoll()
         const func = this.intervalCheckJoystick.bind(this)
@@ -224,7 +225,10 @@ class Joystick {
             const trigger = currentMapping.trigger[i]
             const active = this.checkTrigger(trigger.axis, trigger.range[0], trigger.range[1])
 
-            if (active !== false) {
+            if (!!active) {
+                if (!this.activeTriggers.includes(i)) {
+                    this.activeTriggers.push(i)
+                }
                 let scale = ((active + 1) / (trigger.range[1] + 1)) * 100
 
                 if (trigger.invert) {
@@ -255,7 +259,8 @@ class Joystick {
                 if (trigger.button) {
                     $(`*[ojd-button='${trigger.button}']`).addClass('active')
                 }
-            } else {
+            } else if (this.activeTriggers.includes(i)) {
+                this.activeTriggers = this.activeTriggers.filter((trigg) => trigg !== i)
                 $(`*[ojd-trigger-scale='${i}']`).css('height', '')
                 $(`*[ojd-trigger-scale-inverted='${i}']`).css('height', '')
                 $(`*[ojd-trigger-move='${i}']`).css('top', '')
