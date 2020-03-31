@@ -394,26 +394,20 @@ class Joystick {
         active.DOWN = buttons.DOWN !== false && joystick.buttons[buttons.DOWN] && joystick.buttons[buttons.DOWN].pressed ? true : false
 
         // Check Directions
-        if (active.UP && active.LEFT) { // Check Secondary-Cardinal Directions
+        if (active.UP) {
             offset.yRaw = -1
-            offset.xRaw = -1
-        } else if (active.UP && active.RIGHT) {
-            offset.yRaw = -1
-            offset.xRaw = 1
-        } else if (active.DOWN && active.LEFT) {
-            offset.yRaw = 1
-            offset.xRaw = -1
-        } else if (active.DOWN && active.RIGHT) {
-            offset.yRaw = 1
-            offset.xRaw = 1
-        } else if (active.UP) { // Check Primary-Cardinal Directions
-            offset.yRaw = -1
-        } else if (active.LEFT) {
-            offset.xRaw = -1
         } else if (active.DOWN) {
             offset.yRaw = 1
+        } else {
+            offset.yRaw = 0
+        }
+
+        if (active.LEFT) {
+            offset.xRaw = -1
         } else if (active.RIGHT) {
             offset.xRaw = 1
+        } else {
+            offset.xRaw = 0
         }
 
         offset.x = 50 + (offset.xRaw * 50)
