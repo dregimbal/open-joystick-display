@@ -64,7 +64,7 @@ class Mappings {
     clone(id) {
         const newId = this.mappings.length
         const mapping = Clone(this.getMapping(id))
-        mapping.name = mapping.name + ' (Cloned)'
+        mapping.name += ' (Cloned)'
         this.mappings.push(mapping)
         this.save()
         return newId

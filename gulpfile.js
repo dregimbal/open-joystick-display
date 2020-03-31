@@ -1,10 +1,10 @@
-var gulp 		= require('gulp')
-var watch 		= require('node-watch')
-var less 		= require('gulp-less')
-var combiner 	= require('stream-combiner2')
-var os 			= require('os')
+let gulp 		= require('gulp')
+let watch 		= require('node-watch')
+let less 		= require('gulp-less')
+let combiner 	= require('stream-combiner2')
+let os 			= require('os')
 let cleanCSS 	= require('gulp-clean-css')
-var execSync 	= require('child_process').execSync
+let execSync 	= require('child_process').execSync
 let fs 			= require('fs')
 
 function taskError(e) {

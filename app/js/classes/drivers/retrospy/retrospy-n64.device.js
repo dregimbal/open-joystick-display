@@ -69,12 +69,12 @@ class RetroSpyDevice_N64 {
         if (!isNaN(axisValue)) {
             axisValue = (parseFloat(axisValue) - 128) / 128 // Get Value
             if (inverted) {
-                axisValue = axisValue * -1
+                axisValue *= -1
             }
             return axisValue
-        } else {
+        } 
             return 0.0
-        }
+        
     }
 
     read(line) {

@@ -482,7 +482,7 @@ class Profiles {
     clone(id) {
         const newId = this.profiles.length
         const profile = Clone(this.getProfile(id))
-        profile.name = profile.name + ' (Cloned)'
+        profile.name += ' (Cloned)'
         this.profiles.push(profile)
         this.setCurrentProfile(newId)
         this.save()

@@ -91,9 +91,9 @@ class NetworkDriver {
     getInformation() {
         if (this.joystickConnected) {
             return this.joystickInfo
-        } else {
+        } 
             return 'No joystick connected. Please connect a joystick and press a button to activate.'
-        }
+        
     }
 
     getPorts() {

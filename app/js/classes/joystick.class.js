@@ -2,7 +2,7 @@ const OJD = window.OJD
 const { ChromiumDriver } = require(window.OJD.appendCwdPath('app/js/classes/drivers/chromium.driver.js'))
 const { RetroSpyDriver } = require(window.OJD.appendCwdPath('app/js/classes/drivers/retrospy.driver.js'))
 const { NetworkDriver } = require(window.OJD.appendCwdPath('app/js/classes/drivers/network.driver.js'))
-//const {HIDDriver} 		= require(window.OJD.appendCwdPath("app/js/classes/drivers/hid.driver.js"));
+// const {HIDDriver} 		= require(window.OJD.appendCwdPath("app/js/classes/drivers/hid.driver.js"));
 
 class Joystick {
     constructor(config, profiles) {
@@ -18,10 +18,10 @@ class Joystick {
 
         // New Driver Components
         this.drivers = {
-            'chromium': new ChromiumDriver(this),
-            'retrospy': new RetroSpyDriver(this),
-            'network': new NetworkDriver(this)
-            //'hid':new HIDDriver(this)
+            chromium: new ChromiumDriver(this),
+            retrospy: new RetroSpyDriver(this),
+            network: new NetworkDriver(this)
+            // 'hid':new HIDDriver(this)
         }
 
         // Setup Checking
@@ -155,12 +155,10 @@ class Joystick {
                 multimapCheck.push(k.button)
                 $(`*[ojd-button='${k.button}']`).addClass('active')
                 $(`*[ojd\\:button='${k.button}']`).addClass('active')
-            } else {
-                if (!multimapCheck.includes(k.button)) {
+            } else if (!multimapCheck.includes(k.button)) {
                     $(`*[ojd-button='${k.button}']`).removeClass('active')
                     $(`*[ojd\\:button='${k.button}']`).removeClass('active')
                 }
-            }
         }
 
         // Check for Arcade Stick
@@ -202,12 +200,10 @@ class Joystick {
                     if (pressed) {
                         $(`*[ojd-button='${d}']`).addClass('active')
                         $(`*[ojd\\:button='${d}']`).addClass('active')
-                    } else {
-                        if (!multimapCheck.includes(d)) {
+                    } else if (!multimapCheck.includes(d)) {
                             $(`*[ojd-button='${d}']`).removeClass('active')
                             $(`*[ojd\\:button='${d}']`).removeClass('active')
                         }
-                    }
                 }
             }
 
@@ -217,11 +213,9 @@ class Joystick {
                     const pressed = this.checkDirectionPressed(axisIndex1, axisIndex2, deadzone, d, hasInfinity)
                     if (pressed) {
                         $(`*[ojd-button='${d}']`).addClass('active')
-                    } else {
-                        if (!multimapCheck.includes(d)) {
+                    } else if (!multimapCheck.includes(d)) {
                             $(`*[ojd-button='${d}']`).removeClass('active')
                         }
-                    }
                 }
             }
         }
@@ -242,7 +236,7 @@ class Joystick {
 
                 if (scale > 50) {
                     degreesScale = (scale - 50) / 50
-                    degrees = degrees * degreesScale
+                    degrees *= degreesScale
                 } else if (scale < 50) {
                     degreesScale = ((scale * -1) + 50) / 50
                     degrees = degrees * degreesScale * -1
@@ -355,17 +349,17 @@ class Joystick {
         const joystick = this.getCurrentDriver().getJoystick()
 
         const buttons = {
-            'UP': false,
-            'LEFT': false,
-            'RIGHT': false,
-            'DOWN': false
+            UP: false,
+            LEFT: false,
+            RIGHT: false,
+            DOWN: false
         }
 
         const active = {
-            'UP': false,
-            'LEFT': false,
-            'RIGHT': false,
-            'DOWN': false
+            UP: false,
+            LEFT: false,
+            RIGHT: false,
+            DOWN: false
         }
 
         const offset = {

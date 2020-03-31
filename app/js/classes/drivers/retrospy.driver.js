@@ -46,13 +46,13 @@ class RetroSpyDriver {
 
         // List of Support Device Parsers
         this.devices = {
-            'nes': new RetroSpyDevice_NES(),
-            'snes': new RetroSpyDevice_SNES(),
-            'smashbox': new RetroSpyDevice_SMASHBOX(),
-            'n64': new RetroSpyDevice_N64(),
-            'gc': new RetroSpyDevice_GC(),
-            'md': new RetroSpyDevice_MD(),
-            'pce': new RetroSpyDevice_PCE()
+            nes: new RetroSpyDevice_NES(),
+            snes: new RetroSpyDevice_SNES(),
+            smashbox: new RetroSpyDevice_SMASHBOX(),
+            n64: new RetroSpyDevice_N64(),
+            gc: new RetroSpyDevice_GC(),
+            md: new RetroSpyDevice_MD(),
+            pce: new RetroSpyDevice_PCE()
         }
 
         // Get Serial Ports
@@ -79,7 +79,7 @@ class RetroSpyDriver {
             if (err) {
                 console.info(`RetroSpy: ${err}`)
             }
-        }).bind(this))
+        }))
 
         // On Disconnect Refresh Driver
         this.socket.on('err', (function (err) {
@@ -116,17 +116,17 @@ class RetroSpyDriver {
     getInformation() {
         if (this.device && this.port) {
             return `Connected on ${this.port}: ${this.device.getInformation()}.`
-        } else {
+        } 
             return 'RetroSpy is not connected. Check your arduino installation, your firmware, your serial port, your cable, and if your console is currently on.'
-        }
+        
     }
 
     getJoystick() {
         if (this.device && this.port) {
             return this.device.getJoystick()
-        } else {
+        } 
             return { buttons: [], axes: [] }
-        }
+        
     }
 
     getPorts() {

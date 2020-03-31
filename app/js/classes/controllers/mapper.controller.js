@@ -228,7 +228,7 @@ class MapperController {
         if (group == 'button') {
             mapping.button.push({ button: 'A', index: 0 })
         } else if (group == 'directional') {
-            mapping.directional.push({ axes: [0, 1], deadzone: .25, dpad: false, cpad: false, invertX: false, invertY: false })
+            mapping.directional.push({ axes: [0, 1], deadzone: 0.25, dpad: false, cpad: false, invertX: false, invertY: false })
         } else if (group == 'trigger') {
             mapping.trigger.push({ axis: 0, range: [-1, 1], button: false })
         } else if (group == 'trigger-fixed') {

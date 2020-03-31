@@ -82,13 +82,13 @@ class ProfileController {
 	 * When a input field in the sidebar is edited it will update the profile and render the changes.
 	 */
     onInput(e) {
-        const profile = this.profiles.getCurrentProfile() //@todo, use getter instead
+        const profile = this.profiles.getCurrentProfile() // @todo, use getter instead
         const $e = $(e.target)
         const key = $e.attr('ojd-profile-data')
         const value = $e.val()
 
         if (key.includes('bounds')) {
-            const bounds = profile.bounds //@todo, use getter instead
+            const bounds = profile.bounds // @todo, use getter instead
             const boundsKey = key.replace('bounds.', '')
 
             if (boundsKey === 'x' || boundsKey === 'y') {

@@ -51,9 +51,9 @@ class ChromiumDriver {
     getInformation() {
         if (this.joysticks[this.player].connected) {
             return this.joysticks[this.player].info
-        } else {
+        } 
             return 'No joystick connected. Please connect a joystick and press a button to activate.'
-        }
+        
     }
 
     async initPorts() {
