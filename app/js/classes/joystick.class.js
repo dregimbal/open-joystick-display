@@ -512,8 +512,31 @@ class Joystick {
 
 		}
 
-		let x = (axis1 < deadzone * -1 || axis1 > deadzone) ? axis1 : 0;
-		let y = (axis2 < deadzone * -1 || axis2 > deadzone) ? axis2 : 0;
+		let x = 0;
+		let y = 0;
+
+		// We don't want to devide by zero if the deadzone is 1
+		// If the deadzone is 1, x and y will always be 0
+		if (deadzone === 1) {
+			x = 0;
+			y = 0;
+		} else {
+			if (axis1 > 0) {
+				// Scale from "deadzone->1" to "0->1"
+				x = (Math.max(deadzone, axis1) - deadzone) / (1 - deadzone);
+			} else {
+				// Scale from "-deadzone->-1" to "0->-1"
+				x = (Math.min((deadzone * -1), axis1) + deadzone) / (1 - deadzone);
+			}
+
+			if (axis2 > 0) {
+				// Scale from "deadzone->1" to "0->1"
+				y = (Math.max(deadzone, axis2) - deadzone) / (1 - deadzone);
+			} else {
+				// Scale from "-deadzone->-1" to "0->-1"
+				y = (Math.min((deadzone * -1), axis2) + deadzone) / (1 - deadzone);
+			}
+		}
 
 		offset.xRaw = axis1;
 		offset.yRaw = axis2;
